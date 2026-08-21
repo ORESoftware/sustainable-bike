@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "name": "ORE Sustainable Bike v0.1",
+  "name": "ORE Sustainable Bike v0.2",
   "status": "research-scale-model-only",
   "render": {
     "modelScale": 0.16,
@@ -53,29 +53,60 @@
   },
   "motor": {
     "position": "rear-hub",
-    "ratedPowerW": 250,
-    "peakPowerW": 500,
+    "ratedPowerW": 500,
+    "peakPowerW": 700,
     "nominalVoltageV": 48,
-    "assistCutoffMph": 25,
+    "publicRoadAssistCutoffMph": 19.5,
+    "privateTestAssistCutoffMph": 25,
+    "privateTestModeDefaultEnabled": false,
     "throttle": false,
-    "control": "torque-sensor pedal-assist with independent overspeed cutoff"
+    "control": "torque-sensor pedal-assist with independent wheel-speed and brake-cutoff channels",
+    "motorTemperatureSensor": true,
+    "controllerTemperatureSensor": true,
+    "dualBrakeCutoff": true
   },
   "battery": {
-    "capacityWh": 360,
-    "chemistry": "supplier-qualified lithium-ion pack",
+    "capacityWh": 480,
+    "usableFraction": 0.9,
+    "chemistry": "supplier-qualified LFP pack",
     "placement": "locked serviceable downtube cartridge",
+    "bmsRequired": true,
+    "cellLevelFusingRequired": true,
     "requiredCertificationTargets": ["UL 2271", "UL 2849 system integration"]
   },
   "brakes": {
-    "frontRotorMm": 180,
-    "rearRotorMm": 180,
+    "frontRotorMm": 203,
+    "rearRotorMm": 203,
     "independentHandControls": 2
   },
   "antiTheft": {
     "frontArchitecture": "single-sided captive monoblade",
     "rearArchitecture": "single-sided captive monoblade",
-    "captureRetention": "internal stepped axle with locked tamper cover",
-    "quickRelease": false
+    "captureRetention": "internal stepped axle with positive secondary lock and locked tamper cover",
+    "quickRelease": false,
+    "ordinaryExternalAxleHardware": false
+  },
+  "performanceModel": {
+    "totalMassKg": 133,
+    "airDensityKgM3": 1.225,
+    "dragAreaM2": 0.5,
+    "rollingResistanceCoefficient": 0.012,
+    "motorSystemEfficiency": 0.82,
+    "riderContinuousContributionW": 200
+  },
+  "validation": {
+    "riderTestingPermitted": false,
+    "requiredBeforeRiderTesting": [
+      "material coupon characterization",
+      "front and rear axle-retention proof tests",
+      "frame and monoblade static proof tests",
+      "frame and monoblade fatigue tests",
+      "brake performance and thermal tests",
+      "wheel overspeed, impact, wear, and retention tests",
+      "motor torque-reaction, controller fault, and thermal tests",
+      "battery abuse, ingress, BMS, charger, and certification evidence",
+      "independent mechanical and electrical design review"
+    ]
   },
   "sustainability": {
     "designForDisassembly": true,

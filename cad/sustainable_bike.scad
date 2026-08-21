@@ -31,7 +31,9 @@ assert(CONFIG_STATUS == "research-scale-model-only",
   "This model must not be treated as a ride-ready certified bicycle.");
 assert(FRONT_TEETH > REAR_TEETH, "front sprocket must be larger than rear sprocket");
 assert(len(INTERNAL_GEAR_RATIOS) >= 2, "automatic internal hub requires at least two ratios");
-assert(ASSIST_CUTOFF_MPH <= 30, "assist cutoff exceeds the research envelope");
+assert(PUBLIC_ROAD_ASSIST_CUTOFF_MPH < 20, "public-road-oriented assist cutoff must remain below 20 mph");
+assert(PRIVATE_TEST_ASSIST_CUTOFF_MPH <= 25, "private-course assist target exceeds the research envelope");
+assert(PRIVATE_TEST_MODE_DEFAULT_ENABLED == false, "private-course mode must remain disabled by default");
 
 module rear_wheel_assembly() {
   translate(rear_center)

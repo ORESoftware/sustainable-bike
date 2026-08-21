@@ -15,7 +15,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,14 +23,28 @@ jobs:
           node-version: '22'
       - name: Install OpenSCAD
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends openscad xvfb
-      - name: Unit tests
+      - name: Check shell syntax
+        run: bash -n scripts/*.sh
+      - name: Test calculations and unsafe config mutations
         run: npm test
+      - name: Confirm generated CAD config is committed
+        run: npm run generate:check
       - name: Validate config and compile every CAD target
         run: npm run validate
+      - name: Render printable calibration coupons
+        env:
+          FACET_COUNT: '24'
+          PART_TIMEOUT_SECONDS: '180'
+          RESUME: '0'
+        run: npm run render:coupons
       - name: Render preview
         run: npm run render:preview
       - uses: actions/upload-artifact@v4
         with:
-          name: sustainable-bike-preview
-          path: assets/preview.png
+          name: sustainable-bike-verification
+          path: |
+            assets/preview.png
+            build/stl/frame_coupon.stl
+            build/stl/tire_coupon.stl
+            build/logs/*.log
           if-no-files-found: error
