@@ -1,0 +1,19 @@
+{
+  "name": "sustainable-bike",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Parametric OpenSCAD research model for a captive-wheel, belt-drive, rear-hub-assist sustainable bicycle.",
+  "scripts": {
+    "generate": "node scripts/generate-config.mjs",
+    "validate": "node scripts/validate-config.mjs && bash scripts/smoke-scad.sh",
+    "test": "node --test tests/*.test.mjs",
+    "render": "bash scripts/render.sh",
+    "render:preview": "bash scripts/render-preview.sh",
+    "check": "npm run test && npm run validate"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT"
+}

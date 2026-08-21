@@ -1,0 +1,9 @@
+build/
+node_modules/
+.DS_Store
+*.stl
+*.3mf
+*.amf
+*.csg
+*.log
+!.github/**
