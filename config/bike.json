@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "name": "ORE Sustainable Bike v0.1",
+  "status": "research-scale-model-only",
+  "render": {
+    "modelScale": 0.16,
+    "facetCount": 48,
+    "defaultPart": "assembly"
+  },
+  "geometry": {
+    "wheelbaseMm": 1080,
+    "rearCenterXmm": 0,
+    "chainstayMm": 445,
+    "bottomBracketHeightMm": 290,
+    "seatTubeTopXmm": 365,
+    "seatTubeTopZmm": 750,
+    "headBottomXmm": 900,
+    "headBottomZmm": 560,
+    "headTopXmm": 865,
+    "headTopZmm": 735,
+    "singleSideOffsetMm": 72,
+    "frameOuterRadiusMm": 31,
+    "frameWallMm": 6
+  },
+  "wheel": {
+    "isoBeadSeatDiameterMm": 559,
+    "tireWidthMm": 51,
+    "outsideDiameterMm": 661,
+    "rimSectionRadiusMm": 14,
+    "spokeCount": 8,
+    "spokeWidthMm": 20,
+    "tireMode": "solid",
+    "tireMaterial": "microcellular-TPU-or-qualified-airless-tire",
+    "frontHubRadiusMm": 38,
+    "rearHubRadiusMm": 88,
+    "hubWidthMm": 124
+  },
+  "drivetrain": {
+    "frontChainrings": 1,
+    "frontTeeth": 60,
+    "rearTeeth": 22,
+    "beltPitchMm": 11,
+    "beltWidthMm": 12,
+    "beltTeeth": 123,
+    "beltMaterial": "polyurethane synchronous belt",
+    "tensileCord": "aramid (Kevlar-class), supplier-qualified",
+    "transmission": "synchronous-belt",
+    "lubricationRequired": false,
+    "manualShifter": false,
+    "automaticInternalGears": true,
+    "internalGearRatios": [1.0, 1.36],
+    "nominalCadenceRpm": 85
+  },
+  "motor": {
+    "position": "rear-hub",
+    "ratedPowerW": 250,
+    "peakPowerW": 500,
+    "nominalVoltageV": 48,
+    "assistCutoffMph": 25,
+    "throttle": false,
+    "control": "torque-sensor pedal-assist with independent overspeed cutoff"
+  },
+  "battery": {
+    "capacityWh": 360,
+    "chemistry": "supplier-qualified lithium-ion pack",
+    "placement": "locked serviceable downtube cartridge",
+    "requiredCertificationTargets": ["UL 2271", "UL 2849 system integration"]
+  },
+  "brakes": {
+    "frontRotorMm": 180,
+    "rearRotorMm": 180,
+    "independentHandControls": 2
+  },
+  "antiTheft": {
+    "frontArchitecture": "single-sided captive monoblade",
+    "rearArchitecture": "single-sided captive monoblade",
+    "captureRetention": "internal stepped axle with locked tamper cover",
+    "quickRelease": false
+  },
+  "sustainability": {
+    "designForDisassembly": true,
+    "replaceableTreadOrTire": true,
+    "standardBearings": true,
+    "materialPassport": true,
+    "preferredFrameProcess": "recyclable thermoplastic composite or hybrid metal-insert structure"
+  }
+}
