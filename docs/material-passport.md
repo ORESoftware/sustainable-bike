@@ -9,7 +9,7 @@ Every prototype and production unit should carry a machine-readable identifier t
 | Hub cartridges | Aluminum/steel/composite supplier assembly | Supplier lot and bearing IDs | Rebuild bearings/seals; recycle metal; controlled motor/electronics recovery |
 | Belt | Supplier-qualified polyurethane synchronous belt with aramid tensile cords | Part number, tooth count, batch/date | Inspect/replace; polymer recycling route where available |
 | Tire | Qualified airless tire or validated replaceable tread | Compound/batch, wear indicator | Replace tread/tire independently of wheel; supplier recycling route |
-| Battery | Certified serviceable pack | Pack serial, cell lot, BMS firmware, service history | Authorized repair, second-life assessment, regulated recycling |
+| Battery | Certified serviceable LFP pack | Pack serial, cell lot, BMS firmware, service history | Authorized repair, second-life assessment, regulated recycling |
 | Controller/sensors | Replaceable sealed module | Hardware revision, firmware hash, calibration record | Reuse/reflash where safe; e-waste recovery |
 
 ## Design-for-disassembly rules
