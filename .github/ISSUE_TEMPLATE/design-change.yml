@@ -1,0 +1,42 @@
+name: Design or calculation change
+description: Propose a traceable geometry, material, control, or performance-model change
+title: "design: "
+labels: ["design"]
+assignees: []
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and intended outcome
+      description: Describe the user need without presenting a ride-ready claim.
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: Configuration fields and CAD selectors affected
+    validations:
+      required: true
+  - type: textarea
+    id: hazards
+    attributes:
+      label: Hazards and failure modes
+      description: Include wheel retention, monoblade, brake, tire, motor, battery, and misuse impacts as applicable.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Required analysis and physical evidence
+      description: List tests that must close before any rider-test release decision.
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Safety boundaries
+      options:
+        - label: This issue does not authorize rider testing.
+          required: true
+        - label: This issue does not claim the wheel system is theft-proof.
+          required: true
