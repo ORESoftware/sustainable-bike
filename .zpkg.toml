@@ -1,0 +1,13 @@
+[package]
+name = "sustainable-bike"
+version = "0.1.0"
+description = "Parametric captive-wheel sustainable e-bike research model"
+license = "CERN-OHL-S-2.0"
+
+[toolchain]
+node = ">=22"
+openscad = ">=2021.01"
+
+[scripts]
+check = "npm run check"
+calc = "npm run calc"
