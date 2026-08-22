@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" role="img" aria-labelledby="title desc">
+  <title id="title">Parametric sustainable bicycle concept</title>
+  <desc id="desc">A technical line drawing of a captive-wheel single-sided-fork electric bicycle.</desc>
+  <rect width="1200" height="700" fill="#f6f7f8"/>
+  <g fill="none" stroke="#18212b" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="310" cy="470" r="170"/>
+    <circle cx="900" cy="470" r="170"/>
+    <path d="M310 470 L515 235 L690 470 Z"/>
+    <path d="M515 235 L790 250 L900 470"/>
+    <path d="M515 235 L430 470"/>
+    <path d="M790 250 L835 165"/>
+    <path d="M745 165 L900 165"/>
+    <path d="M490 220 L420 175"/>
+    <path d="M365 175 L475 175"/>
+    <circle cx="690" cy="470" r="58"/>
+    <path d="M690 470 L760 515"/>
+    <path d="M655 530 L725 410"/>
+  </g>
+  <g fill="none" stroke="#5f6b76" stroke-width="10" stroke-linecap="round">
+    <path d="M310 470 L430 470"/>
+    <path d="M900 470 L790 470"/>
+    <path d="M840 470 L930 470"/>
+    <path d="M685 470 C760 445 825 445 900 470"/>
+  </g>
+  <g fill="#18212b" font-family="system-ui, sans-serif">
+    <text x="600" y="80" text-anchor="middle" font-size="42" font-weight="700">Sustainable Bike — v0.2 research geometry</text>
+    <text x="600" y="125" text-anchor="middle" font-size="24">Captive wheels · single-sided monoblades · dry aramid belt · internal hub assist</text>
+    <text x="600" y="655" text-anchor="middle" font-size="22">Research-scale fit-check model — not approved for rider use</text>
+  </g>
+</svg>
