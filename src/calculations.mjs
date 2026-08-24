@@ -138,21 +138,27 @@ export function assistEnvelope(config, speedMph) {
 }
 
 export function deriveMetrics(config) {
-  const lowRatio = Math.min(...config.drivetrain.internalGearRatios);
-  const highRatio = Math.max(...config.drivetrain.internalGearRatios);
+  const ratios = [...config.drivetrain.internalGearRatios].sort((left, right) => left - right);
   const speedBase = {
     cadenceRpm: config.drivetrain.nominalCadenceRpm,
     frontTeeth: config.drivetrain.frontTeeth,
     rearTeeth: config.drivetrain.rearTeeth,
     outsideDiameterMm: config.wheel.outsideDiameterMm,
   };
+  const gearSpeedsMphAtNominalCadence = ratios.map((internalRatio) => roadSpeedMph({
+    ...speedBase,
+    internalRatio,
+  }));
   const publicMode = assistEnvelope(config, config.motor.publicRoadAssistCutoffMph);
   const privateTestMode = assistEnvelope(config, config.motor.privateTestAssistCutoffMph);
 
   return {
+    designYear: config.designYear,
+    designProfile: config.designProfile,
     wheelCircumferenceMm: wheelCircumferenceMm(config.wheel.outsideDiameterMm),
-    lowGearSpeedMphAtNominalCadence: roadSpeedMph({ ...speedBase, internalRatio: lowRatio }),
-    highGearSpeedMphAtNominalCadence: roadSpeedMph({ ...speedBase, internalRatio: highRatio }),
+    gearSpeedsMphAtNominalCadence,
+    lowGearSpeedMphAtNominalCadence: gearSpeedsMphAtNominalCadence.at(0),
+    highGearSpeedMphAtNominalCadence: gearSpeedsMphAtNominalCadence.at(-1),
     wheelRpmAtPublicRoadCutoff: wheelRpmAtMph({
       speedMph: config.motor.publicRoadAssistCutoffMph,
       outsideDiameterMm: config.wheel.outsideDiameterMm,
@@ -174,6 +180,53 @@ export function deriveMetrics(config) {
   };
 }
 
+export function compareDesigns(baseline, successor) {
+  const baselineMetrics = deriveMetrics(baseline);
+  const successorMetrics = deriveMetrics(successor);
+  const errors = [];
+
+  if (successor.designYear <= baseline.designYear) errors.push('successor year must be later than baseline year');
+  if (successor.drivetrain.internalGearRatios.length <= baseline.drivetrain.internalGearRatios.length) {
+    errors.push('successor must add an automatic internal ratio');
+  }
+  if (successor.battery.capacityWh <= baseline.battery.capacityWh) {
+    errors.push('successor battery capacity must increase');
+  }
+  if (successor.sustainability.disassemblyTargetMinutes >= baseline.sustainability.disassemblyTargetMinutes) {
+    errors.push('successor disassembly time must improve');
+  }
+  if (successor.sustainability.recycledContentTargetPercent <= baseline.sustainability.recycledContentTargetPercent) {
+    errors.push('successor recycled-content target must increase');
+  }
+  if (successorMetrics.privateTestMode.continuousMechanicalMarginW
+      <= baselineMetrics.privateTestMode.continuousMechanicalMarginW) {
+    errors.push('successor 25 mph ideal-condition power margin must improve');
+  }
+  if (successorMetrics.privateTestMode.estimatedRangeMiles
+      <= baselineMetrics.privateTestMode.estimatedRangeMiles) {
+    errors.push('successor idealized 25 mph range must improve');
+  }
+
+  return {
+    errors,
+    baseline: baselineMetrics,
+    successor: successorMetrics,
+    deltas: {
+      gearCount: successor.drivetrain.internalGearRatios.length
+        - baseline.drivetrain.internalGearRatios.length,
+      batteryWh: successor.battery.capacityWh - baseline.battery.capacityWh,
+      disassemblyMinutes: successor.sustainability.disassemblyTargetMinutes
+        - baseline.sustainability.disassemblyTargetMinutes,
+      recycledContentPercent: successor.sustainability.recycledContentTargetPercent
+        - baseline.sustainability.recycledContentTargetPercent,
+      privatePowerMarginW: successorMetrics.privateTestMode.continuousMechanicalMarginW
+        - baselineMetrics.privateTestMode.continuousMechanicalMarginW,
+      privateRangeMiles: successorMetrics.privateTestMode.estimatedRangeMiles
+        - baselineMetrics.privateTestMode.estimatedRangeMiles,
+    },
+  };
+}
+
 export function validateBikeConfig(config) {
   const errors = [];
   const warnings = [];
@@ -182,7 +235,11 @@ export function validateBikeConfig(config) {
     if (!condition) errors.push(message);
   };
 
-  requireValue(config?.schemaVersion === 1, 'schemaVersion must be 1');
+  requireValue(config?.schemaVersion === 2, 'schemaVersion must be 2');
+  requireValue(config?.designYear === 2026 || config?.designYear === 2027,
+    'designYear must be 2026 or 2027');
+  requireValue(typeof config?.designProfile === 'string' && config.designProfile.length > 0,
+    'designProfile is required');
   requireValue(config?.status === 'research-scale-model-only',
     'status must remain research-scale-model-only until a qualified safety program approves otherwise');
   requireValue(config?.drivetrain?.frontChainrings === 1,
@@ -195,11 +252,19 @@ export function validateBikeConfig(config) {
     'manual shifting must remain disabled');
   requireValue(config?.drivetrain?.automaticInternalGears === true,
     'rear gearing must be internal and automatic');
+  requireValue(config?.drivetrain?.shiftControl?.riderOperatedControl === false,
+    'the rider must not operate a gear shifter');
+  requireValue(/automatic/i.test(config?.drivetrain?.shiftControl?.mode ?? ''),
+    'shift control must be fully automatic');
   requireValue(Array.isArray(config?.drivetrain?.internalGearRatios)
     && config.drivetrain.internalGearRatios.length >= 2,
   'at least two internal automatic ratios are required');
   requireValue(/aramid|kevlar/i.test(config?.drivetrain?.tensileCord ?? ''),
     'the belt tensile cord specification must be aramid/Kevlar-class');
+  requireValue(['solid', 'airless_lattice'].includes(config?.wheel?.tireMode),
+    'tireMode must be solid or airless_lattice');
+  requireValue(config?.sustainability?.replaceableTreadOrTire === true,
+    'the tire or tread must be service-replaceable');
   requireValue(config?.motor?.position === 'rear-hub',
     'the assist motor must be located in the rear hub');
   requireValue(config?.motor?.throttle === false,
@@ -228,6 +293,10 @@ export function validateBikeConfig(config) {
     'the rear hub motor requires temperature sensing');
   requireValue(config?.motor?.controllerTemperatureSensor === true,
     'the motor controller requires temperature sensing');
+  requireValue(config?.motor?.activeThermalDerating === true,
+    'active motor/controller thermal derating is required');
+  requireValue(config?.motor?.redundantWheelSpeedSensor === true,
+    'redundant wheel-speed sensing is required');
   requireValue(config?.antiTheft?.quickRelease === false,
     'quick-release wheel retention is prohibited');
   requireValue(config?.antiTheft?.ordinaryExternalAxleHardware === false,
@@ -242,11 +311,28 @@ export function validateBikeConfig(config) {
     'a battery-management system is required');
   requireValue(config?.battery?.cellLevelFusingRequired === true,
     'cell-level fusing is required');
+  requireValue(config?.battery?.chargeInterlockRequired === true,
+    'a charge interlock is required');
+  requireValue(config?.battery?.ingressDetectionRequired === true,
+    'battery ingress detection is required');
   requireValue(config?.validation?.riderTestingPermitted === false,
     'rider testing must remain prohibited in the research configuration');
   requireValue(Array.isArray(config?.validation?.requiredBeforeRiderTesting)
-    && config.validation.requiredBeforeRiderTesting.length >= 8,
-  'at least eight explicit rider-test release gates are required');
+    && config.validation.requiredBeforeRiderTesting.length >= 9,
+  'at least nine explicit rider-test release gates are required');
+
+  if (config?.designYear === 2027) {
+    requireValue(config?.drivetrain?.internalGearRatios?.length >= 3,
+      'the 2027 profile requires at least three automatic internal ratios');
+    requireValue(config?.wheel?.tireMode === 'airless_lattice',
+      'the 2027 profile requires the serviceable airless-lattice tire');
+    requireValue(config?.battery?.serviceModuleCount >= 2,
+      'the 2027 profile requires at least two independently serviceable battery modules');
+    requireValue(config?.sustainability?.disassemblyTargetMinutes <= 45,
+      'the 2027 profile requires a 45-minute-or-better disassembly target');
+    requireValue(config?.sustainability?.recycledContentTargetPercent >= 45,
+      'the 2027 profile requires at least 45 percent recycled-content target');
+  }
 
   if ((config?.render?.modelScale ?? 1) > 0.25) {
     warnings.push('default render scale exceeds 1:4; accidental full-scale fabrication risk is increased');
@@ -256,6 +342,9 @@ export function validateBikeConfig(config) {
   }
   if (config?.wheel?.tireMode === 'solid') {
     warnings.push('solid tires remove punctures but increase unsprung mass, impact loading, and rolling losses; validate comfort and frame fatigue');
+  }
+  if (config?.wheel?.tireMode === 'airless_lattice') {
+    warnings.push('airless lattice geometry requires heat-build-up, debris-ingress, tread-retention, impact, and fatigue qualification');
   }
   try {
     if (Math.abs(beltPitchErrorMm(config)) > config.drivetrain.beltPitchMm) {

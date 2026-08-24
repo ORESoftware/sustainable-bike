@@ -1,38 +1,41 @@
 # Sustainable Bike
 
-Parametric OpenSCAD research model for a low-maintenance, repairable bicycle built around:
+Parametric OpenSCAD research models for **2026 and 2027** versions of a low-maintenance, repairable bicycle built around:
 
 - mechanically captive front and rear wheels;
 - single-sided front and rear monoblades rather than conventional double forks;
 - no ordinary external axle nuts or quick-release levers;
-- solid or qualified airless tire geometry;
+- solid or serviceable airless tire geometry;
 - a small rear-hub pedal-assist motor;
-- one front chainring, a dry synchronous belt, and automatic internal rear ratios; and
+- exactly one front ring, a dry aramid/Kevlar-class synchronous belt, and automatic internal rear ratios with no rider-operated shifter; and
 - design-for-disassembly, standard bearings, serviceable electronics, and a material passport.
 
-![Parametric sustainable bicycle concept](assets/preview.png)
+CI renders independent 2026 and 2027 preview artifacts from the same shared CAD modules. `assets/preview.png` remains the legacy compatibility image; run `npm run render:preview` to regenerate all current previews locally.
 
 ## Important boundary
 
-**This repository produces a research-scale model and fit-check geometry, not a ride-ready bicycle.** A rotating wheel cannot literally be the same rigid print as the frame. The design therefore makes each wheel *mechanically captive* inside a single-sided hub cartridge while bearings preserve rotation. Ordinary FDM prints, printed axles, unqualified batteries, or untested structural joints must never be used as a human-carrying bicycle.
+**This repository produces research-scale models and fit-check geometry, not ride-ready bicycles.** A rotating wheel cannot literally be the same rigid print as the frame. Each wheel is therefore mechanically captive inside a single-sided hub cartridge while bearings preserve rotation. Ordinary FDM prints, printed axles, unqualified batteries, or untested structural joints must never be used as a human-carrying bicycle.
 
-The default configuration renders at 16% scale. Full-scale work requires qualified metal or continuous-fiber load paths, professional mechanical/electrical review, correlated analysis, fatigue and impact testing, brake validation, wheel/tire testing, battery-system certification, and applicable bicycle/e-bike compliance testing.
+Both configurations render at 16% scale. Full-scale work requires qualified metal or continuous-fiber load paths, professional mechanical/electrical review, correlated analysis, fatigue and impact testing, brake validation, wheel/tire testing, battery-system certification, and applicable bicycle/e-bike compliance testing.
 
-## v0.2 design snapshot
+## 2026 versus 2027
 
-| Subsystem | Reference configuration |
-|---|---|
-| Wheels | 26 × 2.0 in envelope; solid tire default; optional airless-lattice visualization |
-| Retention | Single-sided monoblades, stepped metal axle, positive secondary lock, locked service cover; no quick release |
-| Human drive | 60T front / 22T rear, 11 mm pitch, 12 mm dry belt, one front ring |
-| Gearing | Automatic internal ratios 1.00 and 1.36; no rider-operated shifter |
-| Assist | Rear hub, 500 W rated / 700 W peak reference envelope, torque-sensor pedal assist, no throttle |
-| Speed modes | 19.5 mph public-road-oriented default; 25 mph private-course engineering mode disabled by default |
-| Battery | 48 V, 480 Wh LFP reference cartridge; locked, removable, BMS and cell-level fusing required |
-| Brakes | Two independent controls, 203 mm front/rear rotor envelopes, independent motor cutoffs |
-| Status | Research scale only; rider testing prohibited until every release gate closes |
+| Subsystem | 2026 | 2027 |
+|---|---|---|
+| Program role | Qualification baseline | Circular-service upgrade |
+| Wheels/tires | 26 × 2.0 in envelope; solid microcellular tire | Same service ecosystem; wider airless lattice with replaceable tread ring |
+| Human drive | 60T / 22T, 12 mm dry belt | 58T / 24T, 14 mm dry belt |
+| Automatic internal ratios | 1.00, 1.36 | 0.80, 1.00, 1.62 |
+| Nominal cadence speeds | about 17.9 and 24.4 mph | about 12.4, 15.5, and 25.1 mph |
+| Rider-operated shifter | None | None |
+| Assist | Rear hub, 500 W rated / 700 W peak, torque sensor, no throttle | Same rated envelope, coordinated three-speed automatic shift control and higher modeled efficiency |
+| Battery | One serviceable 480 Wh LFP cartridge | Two independently serviceable 288 Wh LFP modules, 576 Wh total |
+| 25 mph idealized margin | Narrow, about 8 W | Improved, about 64 W |
+| 25 mph idealized range | About 22 miles | About 30 miles |
+| Disassembly target | 60 minutes | 45 minutes |
+| Recycled-content target | 30% | 45% |
 
-At 85 rpm cadence, the 60/22 belt ratio produces about 17.9 mph in the 1.00 internal ratio and 24.4 mph in the 1.36 ratio. Under the checked-in idealized assumptions—133 kg total mass, 0.50 m² drag area, and 0.012 rolling-resistance coefficient—the flat-road model estimates about 602 W mechanical demand at 25 mph. The modeled 500 W motor and 200 W rider contribution leave only a narrow continuous margin after motor-system losses. Wind, grade, tire heating, battery state, or thermal derating will reduce speed.
+The 25 mph value is a **private-course engineering target** and is disabled by default. The public-road-oriented reference cutoff remains 19.5 mph; destination-specific law and classification still control actual use.
 
 ## Run it
 
@@ -40,14 +43,23 @@ Requirements: Node.js 22+ and OpenSCAD 2021.01 or newer. There are no third-part
 
 ```bash
 npm test
+npm run generate:check
 npm run validate
+npm run compare
 npm run render:preview
-npm run render:coupons
 ```
 
-The full scale-model STL set is intentionally resumable and bounded per part:
+Render a year explicitly:
 
 ```bash
+npm run render:2026
+npm run render:2027
+```
+
+Or select parts and both years:
+
+```bash
+DESIGN_YEAR=all \
 PARTS="front_wheel,rear_hub_cutaway" \
 PART_TIMEOUT_SECONDS=600 \
 FACET_COUNT=36 \
@@ -55,36 +67,38 @@ RESUME=1 \
 npm run render
 ```
 
-Outputs are written under `build/`; the checked-in preview is `assets/preview.png`. Existing nonempty STL outputs are skipped when `RESUME=1`, and each part has an independent timeout and log under `build/logs/`.
+Outputs are written to `build/stl/2026/` and `build/stl/2027/`, with logs under matching year directories. Preview outputs are `assets/preview-2026.png` and `assets/preview-2027.png`.
 
 Select one CAD target directly:
 
 ```bash
 openscad \
-  -o build/front-wheel.stl \
+  -o build/front-wheel-2027.stl \
   -D 'PART="front_wheel"' \
   -D 'RENDER_SCALE=0.16' \
   -D 'FACET_COUNT=36' \
-  cad/sustainable_bike.scad
+  cad/sustainable_bike_2027.scad
 ```
 
 Available targets: `assembly`, `frame`, `front_fork`, `front_wheel`, `rear_wheel`, `drivetrain`, `rear_hub_cutaway`, `frame_coupon`, and `tire_coupon`.
 
 ## Repository map
 
-- `config/bike.json` — authoritative geometry, controls, power model, and validation gates.
-- `src/calculations.mjs` — gearing, wheel speed, belt length, flat-road load, assist margin, and range estimates.
-- `cad/sustainable_bike.scad` — main part router and assembly.
+- `config/designs/2026.json` and `config/designs/2027.json` — authoritative yearly geometry, controls, power model, sustainability targets, and validation gates.
+- `config/bike.json` — exact compatibility copy of the 2026 profile; CI rejects drift.
+- `src/calculations.mjs` — gearing, wheel speed, belt length, flat-road load, assist margin, range, yearly comparison, and validation.
+- `cad/model.scad` — shared part router and assembly geometry.
+- `cad/sustainable_bike_2026.scad` and `cad/sustainable_bike_2027.scad` — yearly CAD entry points.
 - `cad/lib/` — frame, wheel, drivetrain, and component modules.
-- `scripts/` — deterministic config generation, validation, resumable STL export, and preview rendering.
-- `tests/` — calculation and unsafe-configuration mutation tests.
-- `docs/` — architecture, performance model, safety case, manufacturing plan, regulatory notes, and material passport.
+- `scripts/` — deterministic multi-year config generation, validation, comparison, resumable STL export, and preview rendering.
+- `tests/` — calculation, yearly progression, and unsafe-configuration mutation tests.
+- `docs/designs/` — design intent, differences, and qualification roadmap for each year.
 
-## Safety controls encoded in the repository
+## Encoded safety controls
 
-The validator hard-fails if a quick release or ordinary external axle hardware is enabled, if rider testing is permitted, if private 25 mph mode is enabled by default, if the public-road-oriented cutoff reaches 20 mph, if brake/thermal controls are removed, or if the explicit pre-ride validation checklist is shortened below eight gates.
+The validator hard-fails if a quick release or ordinary external axle hardware is enabled, if rider testing is permitted, if private 25 mph mode is enabled by default, if the public-road-oriented cutoff reaches 20 mph, if brake/thermal/speed-sensor controls are removed, or if the explicit pre-ride validation checklist is shortened.
 
-`npm run validate` also compiles every CAD selector at reduced scale and confirms that each target produces distinct geometry.
+The 2027 profile additionally fails if it loses its third automatic ratio, airless-lattice serviceable tire, dual battery modules, 45-minute disassembly target, or 45% recycled-content target.
 
 ## Why the wheel is captive rather than literally fused to the frame
 
@@ -92,11 +106,11 @@ A rigid one-piece wheel/frame cannot rotate. The anti-theft requirement is imple
 
 ## Why a belt, not a Kevlar “chain”
 
-A fiber rope or chain-shaped print cannot reliably preserve pitch or engage bicycle sprockets under torque. This design interprets the maintenance goal as a toothed polyurethane synchronous belt with supplier-qualified aramid tensile cords. The belt is dry-running and does not require chain oil; final components still require supplier application review and fatigue, tooth-shear, alignment, contamination, and tension qualification.
+A fiber rope or chain-shaped print cannot reliably preserve pitch or engage bicycle sprockets under torque. The design uses a toothed polyurethane synchronous belt with supplier-qualified aramid tensile cords. It runs dry and does not require chain oil; final components still require supplier application review and fatigue, tooth-shear, alignment, contamination, and tension qualification.
 
 ## Safety and certification planning
 
-The design-control plan tracks CPSC bicycle requirements, the U.S. low-speed electric-bicycle definition, ISO 4210 bicycle safety/test references, and UL 2849/UL 2271 electrical-system and battery evaluation targets. Those references do not make this model compliant. See `docs/regulatory.md`, `docs/performance-model.md`, and `docs/safety-case.md`.
+The design-control plan tracks 16 CFR part 1512 bicycle requirements, ISO 4210-2:2023, the active ISO 4210-2 Amendment 1 work item, UL 2849 electrical-system evaluation, UL 2271 battery evaluation, and the CPSC's 2026 proposed mandatory micromobility battery rule. Those references do not make either model compliant. See `docs/regulatory.md`, `docs/performance-model.md`, `docs/safety-case.md`, and `docs/designs/comparison.md`.
 
 ## Development policy
 

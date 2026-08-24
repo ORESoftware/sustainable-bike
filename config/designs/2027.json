@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 2,
+  "designYear": 2027,
+  "designProfile": "circular-service-upgrade",
+  "name": "ORE Sustainable Bike 2027",
+  "status": "research-scale-model-only",
+  "render": {
+    "modelScale": 0.16,
+    "facetCount": 52,
+    "defaultPart": "assembly"
+  },
+  "geometry": {
+    "wheelbaseMm": 1090,
+    "rearCenterXmm": 0,
+    "chainstayMm": 453,
+    "bottomBracketHeightMm": 292,
+    "seatTubeTopXmm": 370,
+    "seatTubeTopZmm": 755,
+    "headBottomXmm": 912,
+    "headBottomZmm": 565,
+    "headTopXmm": 876,
+    "headTopZmm": 742,
+    "singleSideOffsetMm": 74,
+    "frameOuterRadiusMm": 32,
+    "frameWallMm": 6.5
+  },
+  "wheel": {
+    "isoBeadSeatDiameterMm": 559,
+    "tireWidthMm": 54,
+    "outsideDiameterMm": 667,
+    "rimSectionRadiusMm": 14.5,
+    "spokeCount": 10,
+    "spokeWidthMm": 19,
+    "tireMode": "airless_lattice",
+    "tireMaterial": "recycled-TPU lattice with replaceable bio-based tread ring",
+    "treadServiceMode": "replaceable-tread-ring",
+    "frontHubRadiusMm": 40,
+    "rearHubRadiusMm": 90,
+    "hubWidthMm": 128
+  },
+  "drivetrain": {
+    "frontChainrings": 1,
+    "frontTeeth": 58,
+    "rearTeeth": 24,
+    "beltPitchMm": 11,
+    "beltWidthMm": 14,
+    "beltTeeth": 124,
+    "beltMaterial": "replaceable polyurethane synchronous belt",
+    "tensileCord": "aramid (Kevlar-class), supplier-qualified",
+    "transmission": "synchronous-belt",
+    "lubricationRequired": false,
+    "manualShifter": false,
+    "automaticInternalGears": true,
+    "internalGearRatios": [
+      0.8,
+      1.0,
+      1.62
+    ],
+    "nominalCadenceRpm": 82,
+    "shiftControl": {
+      "mode": "fully-automatic torque-and-cadence",
+      "riderOperatedControl": false,
+      "upshiftCadenceRpm": [
+        68,
+        82
+      ],
+      "downshiftCadenceRpm": [
+        50,
+        66
+      ],
+      "torqueHoldNm": 50
+    }
+  },
+  "motor": {
+    "position": "rear-hub",
+    "ratedPowerW": 500,
+    "peakPowerW": 700,
+    "nominalVoltageV": 48,
+    "publicRoadAssistCutoffMph": 19.5,
+    "privateTestAssistCutoffMph": 25,
+    "privateTestModeDefaultEnabled": false,
+    "throttle": false,
+    "control": "torque-sensor pedal-assist with redundant wheel speed, dual brake cutoff, and automatic shift coordination",
+    "motorTemperatureSensor": true,
+    "controllerTemperatureSensor": true,
+    "activeThermalDerating": true,
+    "redundantWheelSpeedSensor": true,
+    "dualBrakeCutoff": true
+  },
+  "battery": {
+    "capacityWh": 576,
+    "usableFraction": 0.88,
+    "chemistry": "supplier-qualified LFP modules",
+    "placement": "two locked serviceable 288 Wh downtube modules",
+    "serviceModuleCount": 2,
+    "moduleCapacityWh": 288,
+    "bmsRequired": true,
+    "cellLevelFusingRequired": true,
+    "chargeInterlockRequired": true,
+    "ingressDetectionRequired": true,
+    "requiredCertificationTargets": [
+      "UL 2271",
+      "UL 2849 system integration",
+      "CPSC micromobility battery rule watch (2026 proposal and successor)"
+    ]
+  },
+  "brakes": {
+    "frontRotorMm": 203,
+    "rearRotorMm": 203,
+    "independentHandControls": 2,
+    "padWearInspectionPort": true
+  },
+  "antiTheft": {
+    "frontArchitecture": "single-sided captive monoblade with sealed bearing cassette",
+    "rearArchitecture": "single-sided captive monoblade with service-key hub cartridge",
+    "captureRetention": "internal stepped axle, positive secondary lock, captive service fasteners, and locked tamper cover",
+    "quickRelease": false,
+    "ordinaryExternalAxleHardware": false
+  },
+  "performanceModel": {
+    "totalMassKg": 129,
+    "airDensityKgM3": 1.225,
+    "dragAreaM2": 0.48,
+    "rollingResistanceCoefficient": 0.011,
+    "motorSystemEfficiency": 0.86,
+    "riderContinuousContributionW": 200
+  },
+  "validation": {
+    "riderTestingPermitted": false,
+    "requiredBeforeRiderTesting": [
+      "material coupon characterization",
+      "front and rear axle-retention proof tests",
+      "frame and monoblade static proof tests",
+      "frame and monoblade fatigue tests",
+      "brake performance and thermal tests",
+      "wheel overspeed, impact, wear, and retention tests",
+      "motor torque-reaction, controller fault, and thermal tests",
+      "battery abuse, ingress, BMS, charger, and certification evidence",
+      "independent mechanical and electrical design review",
+      "airless tire heat-build-up and replaceable-tread retention tests",
+      "automatic three-speed shift endurance and fail-safe tests",
+      "dual battery-module isolation, mismatch, and hot-plug prevention tests"
+    ],
+    "standardsWatch": [
+      "16 CFR part 1512 bicycle requirements",
+      "ISO 4210-2:2023 and active Amendment 1 development",
+      "UL 2849 electrical system evaluation",
+      "UL 2271 battery evaluation",
+      "CPSC proposed mandatory micromobility lithium-ion battery safety rule and final successor"
+    ]
+  },
+  "sustainability": {
+    "designForDisassembly": true,
+    "replaceableTreadOrTire": true,
+    "standardBearings": true,
+    "materialPassport": true,
+    "batteryModuleReplaceable": true,
+    "fastenerFamilyCountMax": 4,
+    "disassemblyTargetMinutes": 45,
+    "recycledContentTargetPercent": 45,
+    "preferredFrameProcess": "recyclable continuous-fiber thermoplastic shells around replaceable metal safety inserts"
+  }
+}

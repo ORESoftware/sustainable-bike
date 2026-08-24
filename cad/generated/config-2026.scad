@@ -1,4 +1,4 @@
-// Generated from config/designs/2026.json (compatibility default). Do not edit by hand.
+// Generated from config/designs/2026.json. Do not edit by hand.
 DESIGN_YEAR = 2026;
 DESIGN_PROFILE = "qualification-baseline";
 BIKE_NAME = "ORE Sustainable Bike 2026";

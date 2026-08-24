@@ -15,7 +15,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,26 +25,32 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends openscad xvfb
       - name: Check shell syntax
         run: bash -n scripts/*.sh
-      - name: Test calculations and unsafe config mutations
+      - name: Test calculations, year deltas, and unsafe config mutations
         run: npm test
-      - name: Confirm generated CAD config is committed
+      - name: Confirm both generated CAD configs are committed
         run: npm run generate:check
-      - name: Validate config and compile every CAD target
+      - name: Validate both configs and compile every yearly CAD target
         run: npm run validate
-      - name: Render printable calibration coupons
+      - name: Emit year-over-year engineering comparison
+        run: npm run compare | tee build/design-comparison.json
+      - name: Render printable calibration coupons for both years
         env:
           FACET_COUNT: '24'
           PART_TIMEOUT_SECONDS: '180'
           RESUME: '0'
         run: npm run render:coupons
-      - name: Render preview
+      - name: Render both yearly previews
         run: npm run render:preview
       - uses: actions/upload-artifact@v4
         with:
-          name: sustainable-bike-verification
+          name: sustainable-bike-2026-2027-verification
           path: |
-            assets/preview.png
-            build/stl/frame_coupon.stl
-            build/stl/tire_coupon.stl
-            build/logs/*.log
+            assets/preview-2026.png
+            assets/preview-2027.png
+            build/design-comparison.json
+            build/stl/2026/frame_coupon.stl
+            build/stl/2026/tire_coupon.stl
+            build/stl/2027/frame_coupon.stl
+            build/stl/2027/tire_coupon.stl
+            build/logs/**/*.log
           if-no-files-found: error
