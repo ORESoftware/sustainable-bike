@@ -1,18 +1,23 @@
 {
   "name": "sustainable-bike",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
-  "description": "Parametric OpenSCAD research model for a captive-wheel, belt-drive, rear-hub-assist sustainable bicycle.",
+  "description": "Parametric 2026/2027 OpenSCAD research models for a captive-wheel, belt-drive, automatic internal-hub sustainable bicycle.",
   "scripts": {
     "generate": "node scripts/generate-config.mjs",
+    "generate:check": "node scripts/generate-config.mjs --check",
     "validate": "node scripts/validate-config.mjs && bash scripts/smoke-scad.sh",
+    "compare": "node scripts/compare-designs.mjs",
     "test": "node --test tests/*.test.mjs",
     "render": "bash scripts/render.sh",
-    "render:preview": "bash scripts/render-preview.sh",
-    "check": "npm run test && npm run generate:check && npm run validate",
-    "render:coupons": "PARTS=frame_coupon,tire_coupon RENDER_PREVIEW=0 bash scripts/render.sh",
-    "generate:check": "node scripts/generate-config.mjs --check"
+    "render:2026": "DESIGN_YEAR=2026 bash scripts/render.sh",
+    "render:2027": "DESIGN_YEAR=2027 bash scripts/render.sh",
+    "render:preview": "DESIGN_YEAR=all bash scripts/render-preview.sh",
+    "render:preview:2026": "DESIGN_YEAR=2026 bash scripts/render-preview.sh",
+    "render:preview:2027": "DESIGN_YEAR=2027 bash scripts/render-preview.sh",
+    "render:coupons": "DESIGN_YEAR=all PARTS=frame_coupon,tire_coupon RENDER_PREVIEW=0 bash scripts/render.sh",
+    "check": "npm run test && npm run generate:check && npm run validate"
   },
   "engines": {
     "node": ">=22"
