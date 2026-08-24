@@ -1,0 +1,298 @@
+name: Import complete sustainable-bike bundle history from text chunks
+run-name: Import complete sustainable-bike bundle history from text chunks @ ${{ github.sha }}
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/ops-import-complete-bundle-b64.yml
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+    branches: [main]
+    paths:
+      - .github/import/sustainable-bike-v0.2.0.bundle.base64.part-000
+      - .github/import/sustainable-bike-v0.2.0.bundle.base64.part-001
+      - .github/import/sustainable-bike-v0.2.0.bundle.base64.part-002
+      - .github/import/sustainable-bike-v0.2.0.bundle.base64.part-003
+      - .github/import/sustainable-bike-v0.2.0.bundle.base64.part-004
+      - .github/import/sustainable-bike-v0.2.0.bundle.base64.part-005
+      - .github/import/sustainable-bike-v0.2.0.bundle.base64.part-006
+      - .github/import/sustainable-bike-v0.2.0.bundle.base64.part-007
+      - .github/import/sustainable-bike-v0.2.0.bundle.base64.part-008
+      - .github/import/sustainable-bike-v0.2.0.bundle.base64.part-009
+      - .github/import/sustainable-bike-v0.2.0.bundle.base64.part-010
+      - .github/import/sustainable-bike-v0.2.0.bundle.sha256
+
+permissions:
+  contents: read
+
+concurrency:
+  group: den-3843-import-complete-bundle-history-b64
+  cancel-in-progress: false
+
+jobs:
+  validate-workflow:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Validate bounded workflow contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          test '${{ github.repository }}' = 'ORESoftware/sustainable-bike'
+          test '${{ github.event.pull_request.user.login }}' = 'ORESoftware'
+          printf 'bundle=%s bytes=%s parts=%s tracking=%s policy=%s\n' \
+            'ba05db2234aa7fb51d3784d3b725cca757b5d2a4b3399b4b60f8fc62982ab756' \
+            '240001' '11' 'DEN-3843' 'no-force-no-rebase'
+
+  import-history:
+    if: >-
+      github.event_name == 'pull_request_target' &&
+      github.event.pull_request.draft == true &&
+      github.event.pull_request.user.login == 'ORESoftware' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'ops/den-3843-complete-bundle-carrier' &&
+      github.event.pull_request.title == 'DO NOT MERGE: import complete sustainable-bike v0.2.0 git bundle'
+    permissions:
+      contents: write
+      pull-requests: write
+      statuses: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      REPOSITORY: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      EXPECTED_BUNDLE_SHA256: ba05db2234aa7fb51d3784d3b725cca757b5d2a4b3399b4b60f8fc62982ab756
+      BUNDLE_V01_ROOT: 83da6ea14b7946b6947e3ba126b094c6f122f42d
+      BUNDLE_V01_FEATURE: 5b8f5d5f02ac4b3e05b636cb505d632b426eda24
+      BUNDLE_V01_MAIN: 3e99495cf7bf1a86b177fb747b23d9a15c578ac3
+      BUNDLE_POWER_HEAD: e2c1a0a3b4ae136265a58be1f1b331c046e1cf2c
+      BUNDLE_V02_MAIN: 61e86ca632d7455aa91b6350579d0f8f39c5c0b5
+      BUNDLE_V01_TAG_OBJECT: 4301d8c1e7447981ceb77244f1a12265141fb230
+      BUNDLE_V02_TAG_OBJECT: fb1e05076952ac856fef506b90f30093869f6759
+    steps:
+      - name: Validate exact same-repository carrier
+        id: carrier
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          pull="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}")"
+          head_sha="$(jq -er '.head.sha | select(test("^[0-9a-f]{40}$"))' <<<"$pull")"
+          main_sha="$(gh api "repos/${REPOSITORY}/git/ref/heads/main" --jq '.object.sha')"
+          [[ "$main_sha" =~ ^[0-9a-f]{40}$ ]]
+
+          jq -e '
+            .draft == true and
+            .user.login == "ORESoftware" and
+            .base.ref == "main" and
+            .head.repo.full_name == "ORESoftware/sustainable-bike" and
+            .head.ref == "ops/den-3843-complete-bundle-carrier" and
+            .title == "DO NOT MERGE: import complete sustainable-bike v0.2.0 git bundle" and
+            .commits == 1 and
+            .changed_files == 12 and
+            .deletions == 0
+          ' <<<"$pull" >/dev/null
+
+          commits="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/commits?per_page=100")"
+          test "$(jq 'length' <<<"$commits")" -eq 1
+          parent_sha="$(jq -er '.[0].parents[0].sha | select(test("^[0-9a-f]{40}$"))' <<<"$commits")"
+
+          files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files?per_page=100")"
+          mapfile -t paths < <(jq -r '.[].filename' <<<"$files" | sort)
+          expected=(
+            .github/import/sustainable-bike-v0.2.0.bundle.base64.part-000
+            .github/import/sustainable-bike-v0.2.0.bundle.base64.part-001
+            .github/import/sustainable-bike-v0.2.0.bundle.base64.part-002
+            .github/import/sustainable-bike-v0.2.0.bundle.base64.part-003
+            .github/import/sustainable-bike-v0.2.0.bundle.base64.part-004
+            .github/import/sustainable-bike-v0.2.0.bundle.base64.part-005
+            .github/import/sustainable-bike-v0.2.0.bundle.base64.part-006
+            .github/import/sustainable-bike-v0.2.0.bundle.base64.part-007
+            .github/import/sustainable-bike-v0.2.0.bundle.base64.part-008
+            .github/import/sustainable-bike-v0.2.0.bundle.base64.part-009
+            .github/import/sustainable-bike-v0.2.0.bundle.base64.part-010
+            .github/import/sustainable-bike-v0.2.0.bundle.sha256
+          )
+          test "${#paths[@]}" -eq "${#expected[@]}"
+          for index in "${!expected[@]}"; do
+            test "${paths[$index]}" = "${expected[$index]}"
+          done
+          jq -e 'all(.[]; .status == "added")' <<<"$files" >/dev/null
+
+          comparison="$(gh api "repos/${REPOSITORY}/compare/${parent_sha}...${main_sha}")"
+          jq -e '(.status == "ahead" or .status == "identical") and .behind_by == 0' <<<"$comparison" >/dev/null
+          printf 'head_sha=%s\n' "$head_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Reconstruct and verify immutable bundle
+        id: bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CARRIER_HEAD_SHA: ${{ steps.carrier.outputs.head_sha }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          umask 077
+          work="$(mktemp -d "$RUNNER_TEMP/sustainable-bike-bundle.XXXXXX")"
+          printf 'work=%s\n' "$work" >> "$GITHUB_OUTPUT"
+          bundle_b64="$work/sustainable-bike-v0.2.0.bundle.base64"
+          bundle="$work/sustainable-bike-v0.2.0.bundle"
+
+          for index in 000 001 002 003 004 005 006 007 008 009 010; do
+            path=".github/import/sustainable-bike-v0.2.0.bundle.base64.part-${index}"
+            gh api "repos/${REPOSITORY}/contents/${path}?ref=${CARRIER_HEAD_SHA}" \
+              --jq '.content' \
+              | tr -d '\n' \
+              | base64 --decode \
+              >> "$bundle_b64"
+          done
+          test "$(wc -c < "$bundle_b64" | tr -d ' ')" -eq 320004
+          base64 --decode "$bundle_b64" > "$bundle"
+
+          checksum_path='.github/import/sustainable-bike-v0.2.0.bundle.sha256'
+          expected_file="$(
+            gh api "repos/${REPOSITORY}/contents/${checksum_path}?ref=${CARRIER_HEAD_SHA}" \
+              --jq '.content' \
+              | tr -d '\n' \
+              | base64 --decode
+          )"
+          test "$expected_file" = "$EXPECTED_BUNDLE_SHA256  sustainable-bike-v0.2.0.bundle"
+          observed="$(sha256sum "$bundle" | awk '{print $1}')"
+          test "$observed" = "$EXPECTED_BUNDLE_SHA256"
+          test "$(wc -c < "$bundle" | tr -d ' ')" -eq 240001
+
+          git init -q "$work/verifier"
+          git -C "$work/verifier" bundle verify "$bundle"
+          git clone -q "$bundle" "$work/source"
+          for object in \
+            "$BUNDLE_V01_ROOT^{commit}" \
+            "$BUNDLE_V01_FEATURE^{commit}" \
+            "$BUNDLE_V01_MAIN^{commit}" \
+            "$BUNDLE_POWER_HEAD^{commit}" \
+            "$BUNDLE_V02_MAIN^{commit}" \
+            "$BUNDLE_V01_TAG_OBJECT^{tag}" \
+            "$BUNDLE_V02_TAG_OBJECT^{tag}"; do
+            git -C "$work/source" cat-file -e "$object"
+          done
+
+      - name: Publish every bundle commit without rewriting live refs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WORK: ${{ steps.bundle.outputs.work }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          source_repo="$WORK/source"
+          gh auth setup-git
+          git -C "$source_repo" remote add target "https://github.com/${REPOSITORY}.git"
+
+          ensure_ref() {
+            local source_object="$1"
+            local destination="$2"
+            local existing
+            existing="$(git -C "$source_repo" ls-remote target "$destination" | awk 'NR==1 {print $1}')"
+            if [[ -n "$existing" ]]; then
+              test "$existing" = "$source_object"
+              printf 'verified-existing %s %s\n' "$destination" "$existing"
+            else
+              git -C "$source_repo" push target "$source_object:$destination"
+              printf 'published %s %s\n' "$destination" "$source_object"
+            fi
+          }
+
+          ensure_ref "$BUNDLE_V01_ROOT" refs/heads/history/bundle-v0.1.0-root
+          ensure_ref "$BUNDLE_V01_FEATURE" refs/heads/history/bundle-feat-parametric-captive-bike-v0
+          ensure_ref "$BUNDLE_V01_MAIN" refs/heads/history/bundle-v0.1.0-main
+          ensure_ref "$BUNDLE_POWER_HEAD" refs/heads/feat/power-and-export-hardening
+          ensure_ref "$BUNDLE_V02_MAIN" refs/heads/history/bundle-v0.2.0-main
+          ensure_ref "$BUNDLE_V01_TAG_OBJECT" refs/tags/v0.1.0
+          ensure_ref "$BUNDLE_V02_TAG_OBJECT" refs/tags/history/v0.2.0-local-bundle
+
+          existing_v02="$(git -C "$source_repo" ls-remote target refs/tags/v0.2.0 | awk 'NR==1 {print $1}')"
+          test -n "$existing_v02"
+          test "$existing_v02" != "$BUNDLE_V02_TAG_OBJECT"
+          printf 'preserved-existing refs/tags/v0.2.0 %s\n' "$existing_v02"
+
+      - name: Attach original bundle history to current main with a merge commit
+        id: attach
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WORK: ${{ steps.bundle.outputs.work }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          gh auth setup-git
+          target_repo="$WORK/target"
+          git clone -q "https://github.com/${REPOSITORY}.git" "$target_repo"
+          git -C "$target_repo" config user.name 'ORESoftware publication automation'
+          git -C "$target_repo" config user.email 'bot@oresoftware.dev'
+          git -C "$target_repo" fetch origin \
+            "refs/heads/history/bundle-v0.2.0-main:refs/remotes/origin/history/bundle-v0.2.0-main"
+
+          if git -C "$target_repo" merge-base --is-ancestor "$BUNDLE_V02_MAIN" HEAD; then
+            echo 'Original bundle history is already reachable from main.'
+          else
+            git -C "$target_repo" merge \
+              --no-ff \
+              --allow-unrelated-histories \
+              -s ours \
+              -m 'merge(DEN-3843): attach original sustainable-bike bundle history' \
+              "$BUNDLE_V02_MAIN"
+            git -C "$target_repo" push origin HEAD:refs/heads/main
+          fi
+
+          final_main="$(git -C "$target_repo" rev-parse HEAD)"
+          [[ "$final_main" =~ ^[0-9a-f]{40}$ ]]
+          git -C "$target_repo" merge-base --is-ancestor "$BUNDLE_V02_MAIN" "$final_main"
+          printf 'main_sha=%s\n' "$final_main" >> "$GITHUB_OUTPUT"
+
+      - name: Verify all published refs and close carrier without merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WORK: ${{ steps.bundle.outputs.work }}
+          FINAL_MAIN: ${{ steps.attach.outputs.main_sha }}
+          CARRIER_HEAD_SHA: ${{ steps.carrier.outputs.head_sha }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          source_repo="$WORK/source"
+
+          assert_remote_ref() {
+            local expected="$1"
+            local ref="$2"
+            local observed
+            observed="$(git -C "$source_repo" ls-remote target "$ref" | awk 'NR==1 {print $1}')"
+            test "$observed" = "$expected"
+          }
+
+          assert_remote_ref "$BUNDLE_V01_ROOT" refs/heads/history/bundle-v0.1.0-root
+          assert_remote_ref "$BUNDLE_V01_FEATURE" refs/heads/history/bundle-feat-parametric-captive-bike-v0
+          assert_remote_ref "$BUNDLE_V01_MAIN" refs/heads/history/bundle-v0.1.0-main
+          assert_remote_ref "$BUNDLE_POWER_HEAD" refs/heads/feat/power-and-export-hardening
+          assert_remote_ref "$BUNDLE_V02_MAIN" refs/heads/history/bundle-v0.2.0-main
+          assert_remote_ref "$BUNDLE_V01_TAG_OBJECT" refs/tags/v0.1.0
+          assert_remote_ref "$BUNDLE_V02_TAG_OBJECT" refs/tags/history/v0.2.0-local-bundle
+
+          body="$(cat <<EOF
+          Complete bundle history imported and verified without force-push or rebase.
+
+          - original five commits: \`${BUNDLE_V01_ROOT}\` through \`${BUNDLE_V02_MAIN}\`
+          - original power branch: \`feat/power-and-export-hardening@${BUNDLE_POWER_HEAD}\`
+          - preserved v0.1 tag object: \`${BUNDLE_V01_TAG_OBJECT}\`
+          - preserved conflicting local v0.2 tag object as \`history/v0.2.0-local-bundle@${BUNDLE_V02_TAG_OBJECT}\`
+          - existing live \`v0.2.0\` tag was not rewritten
+          - current \`main\`: \`${FINAL_MAIN}\`, with the original bundle history reachable as a merge parent
+          - existing newer \`feat/parametric-captive-bike-v0\` was not rewritten; the original head is retained at \`history/bundle-feat-parametric-captive-bike-v0\`
+
+          The carrier remains unmerged and is being closed. Refs DEN-3843.
+          EOF
+          )"
+          gh pr comment "$PR_NUMBER" --repo "$REPOSITORY" --body "$body" >/dev/null
+          gh api --method POST "repos/${REPOSITORY}/statuses/${CARRIER_HEAD_SHA}" \
+            -f state=success \
+            -f context='ops/complete-bundle-history-import' \
+            -f description='all bundle commits and non-conflicting refs verified' >/dev/null
+          gh pr close "$PR_NUMBER" --repo "$REPOSITORY" >/dev/null
+          rm -rf "$WORK"
