@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0 — 2026-08-23
+
+- Added independently versioned 2026 qualification-baseline and 2027 circular-service design profiles.
+- Refactored CAD into shared geometry plus separate 2026/2027 entry points and generated configuration files.
+- Added a 2027 three-speed fully automatic internal hub, wider aramid belt, serviceable airless-lattice tread, dual 288 Wh LFP modules, improved modeled efficiency/range, and stronger circularity targets.
+- Added deterministic year-over-year comparison checks and safety regressions for rider-operated shifting, two-speed 2027 fallback, thermal/speed-sensor removal, and yearly alias drift.
+- Updated render, preview, smoke, and CI paths to validate and publish artifacts for both years.
+- Added dedicated 2026, 2027, and comparison design-control documentation.
+
 ## 0.2.0 — 2026-08-21
 
 - Split assist control into a 19.5 mph public-road-oriented default and a 25 mph private-course mode disabled by default.
