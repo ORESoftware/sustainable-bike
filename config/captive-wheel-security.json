@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "goal": "prevent casual wheel theft while preserving controlled serviceability",
+  "architecture": {
+    "frontSupport": "single-sided-monoblade",
+    "rearSupport": "single-sided-swingarm",
+    "quickReleaseAllowed": false,
+    "externallyAccessibleAxleNutAllowed": false,
+    "secondaryRetentionRequired": true,
+    "lockedServiceCoverRequired": true
+  },
+  "verification": [
+    {"id":"front-captive-retention","required":true,"method":"fixture-pull-and-torque"},
+    {"id":"rear-captive-retention","required":true,"method":"fixture-pull-and-torque"},
+    {"id":"service-cover-tamper-resistance","required":true,"method":"tool-access-audit"},
+    {"id":"bearing-service-without-frame-destruction","required":true,"method":"documented-service-trial"},
+    {"id":"motor-service-without-wheel-release","required":true,"method":"documented-service-trial"}
+  ]
+}
