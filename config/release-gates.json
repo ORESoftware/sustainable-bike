@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "humanRiderTestingAllowed": false,
+  "requiredGates": [
+    {"id":"frame-static-load","category":"structure","evidence":"destructive-or-proof-test","required":true},
+    {"id":"fork-fatigue","category":"structure","evidence":"fatigue-test","required":true},
+    {"id":"wheel-retention","category":"anti-theft","evidence":"retention-test","required":true},
+    {"id":"brake-performance","category":"braking","evidence":"instrumented-stop-test","required":true},
+    {"id":"hub-torque-reaction","category":"drive","evidence":"torque-fixture-test","required":true},
+    {"id":"battery-electrical-safety","category":"electrical","evidence":"certified-pack-or-lab-test","required":true},
+    {"id":"controller-thermal","category":"electrical","evidence":"thermal-soak-test","required":true},
+    {"id":"tire-retention-and-wear","category":"rolling-stock","evidence":"drum-or-road-fixture-test","required":true}
+  ]
+}
