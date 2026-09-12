@@ -1,0 +1,82 @@
+name: Tag sustainable-bike v0.2.0 once
+run-name: Tag v0.2.0 at verified main ${{ github.event.pull_request.base.sha }}
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches: [main]
+    paths:
+      - .github/workflows/ops-tag-v0.2.0-once.yml
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: den-3844-tag-v0.2.0-once
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    if: >-
+      github.event.pull_request.draft == true &&
+      github.actor == 'ORESoftware' &&
+      github.event.pull_request.user.login == 'ORESoftware' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'ops/den-3844-tag-v0.2.0' &&
+      github.event.pull_request.title == 'DO NOT MERGE: tag sustainable-bike v0.2.0'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      EXPECTED_REPOSITORY: ORESoftware/sustainable-bike
+      EXPECTED_MAIN: 7728bc29f23108e903e4c5726815d94c9c0df292
+      EXPECTED_TAG: v0.2.0
+      WORKFLOW_PATH: .github/workflows/ops-tag-v0.2.0-once.yml
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      - name: Validate exact carrier and create lightweight tag
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          test "$GITHUB_REPOSITORY" = "$EXPECTED_REPOSITORY"
+          test "$GITHUB_ACTOR" = 'ORESoftware'
+
+          pull="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")"
+          jq -e --arg path "$WORKFLOW_PATH" '
+            .draft == true and
+            .user.login == "ORESoftware" and
+            .base.ref == "main" and
+            .head.repo.full_name == "ORESoftware/sustainable-bike" and
+            .head.ref == "ops/den-3844-tag-v0.2.0" and
+            .title == "DO NOT MERGE: tag sustainable-bike v0.2.0" and
+            .commits == 1 and
+            .changed_files == 1
+          ' <<<"$pull" >/dev/null
+
+          files="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/files?per_page=100")"
+          jq -e --arg path "$WORKFLOW_PATH" '
+            length == 1 and
+            .[0].filename == $path and
+            .[0].status == "added"
+          ' <<<"$files" >/dev/null
+
+          main_sha="$(gh api "repos/${GITHUB_REPOSITORY}/branches/main" --jq .commit.sha)"
+          test "$main_sha" = "$EXPECTED_MAIN"
+
+          if tag="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${EXPECTED_TAG}" 2>/dev/null)"; then
+            test "$(jq -r .object.sha <<<"$tag")" = "$EXPECTED_MAIN"
+            outcome=verified-existing
+          else
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/git/refs" \
+              -f ref="refs/tags/${EXPECTED_TAG}" \
+              -f sha="$EXPECTED_MAIN" >/dev/null
+            outcome=created
+          fi
+
+          tagged_sha="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${EXPECTED_TAG}" --jq .object.sha)"
+          test "$tagged_sha" = "$EXPECTED_MAIN"
+
+          gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" \
+            --body "DEN-3844 tag receipt: \`${EXPECTED_TAG}\` ${outcome} at \`${tagged_sha}\`. This carrier must be closed without merge." >/dev/null
