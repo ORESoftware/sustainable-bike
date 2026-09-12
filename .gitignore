@@ -7,3 +7,7 @@ node_modules/
 *.csg
 *.log
 !.github/**
+
+# Sanctioned scratch locations - AGENTS.md requires both, trailing-slash form
+tmp/
+temp/
